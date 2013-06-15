@@ -1,0 +1,3 @@
+[submodule "sik"]
+	path = sik
+	url = git@github.com:nicknisi/SIK-Guide-Code.git
