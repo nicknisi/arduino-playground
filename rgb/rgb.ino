@@ -1,98 +1,66 @@
 const int RED_PIN = 9;
 const int GREEN_PIN = 10;
-const int BLUE_PIN = 11;
+const int BLUE_PIN=  11;
+const int LED_PIN = 13;
 
-int DISPLAT_TIME = 100;
+int DISPLAY_TIME = 100;
 
 void setup() {
-    pinMode(RED_PIN, OUTPUT);
-    pinMode(GREEN_PIN, OUTPUT);
-    pinMode(BLUE_PIN, OUTPUT);
+	Serial.begin(9600);
+	pinMode(RED_PIN, OUTPUT);
+	pinMode(GREEN_PIN, OUTPUT);
+	pinMode(BLUE_PIN, OUTPUT);
+	pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
-    mainColors();
-    showSpectrum();
+	if (Serial.available() > 0) {
+		int value = serialReadInt();
+		if (value == -1) {
+			digitalWrite(LED_PIN, LOW);
+		} else {
+			digitalWrite(LED_PIN, HIGH);
+		}
+		Serial.println(value);
+		showRGB(value);
+	}
+	/* delay(1000); */
 }
 
-void mainColors() {
-    // RED
-    digitalWrite(RED_PIN, LOW);
-    digitalWrite(GREEN_PIN, LOW);
-    digitalWrite(BLUE_PIN, LOW);
+int serialReadInt() {
+	unsigned char MSB = 0; // 1 byte in arduino
+	unsigned char LSB = 0; // 1 byte in arduino
+	unsigned int MSBLSB = 0; // 2 bytes in arduino
 
-    delay(1000);
+	if (Serial.available() >= 2) {
+		MSB = Serial.read();
+		LSB = Serial.read();
+		MSBLSB = word(MSB, LSB);
+	}
 
-    // GREEN
-    digitalWrite(RED_PIN, LOW);
-    digitalWrite(GREEN_PIN, HIGH);
-    digitalWrite(BLUE_PIN, LOW);
-
-    delay(1000);
-
-    // BLUE
-    digitalWrite(RED_PIN, LOW);
-    digitalWrite(GREEN_PIN, LOW);
-    digitalWrite(BLUE_PIN, HIGH);
-
-    delay(1000);
-
-    // YELLOW
-    digitalWrite(RED_PIN, HIGH);
-    digitalWrite(GREEN_PIN, HIGH);
-    digitalWrite(BLUE_PIN, LOW);
-
-    delay(1000);
-
-    // CYAN
-    digitalWrite(RED_PIN, LOW);
-    digitalWrite(GREEN_PIN, HIGH);
-    digitalWrite(BLUE_PIN, HIGH);
-
-    delay(1000);
-
-    // PURPLE
-    digitalWrite(RED_PIN, HIGH);
-    digitalWrite(GREEN_PIN, LOW);
-    digitalWrite(BLUE_PIN, HIGH);
-
-    delay(1000);
-
-    // WHITE
-    digitalWrite(RED_PIN, HIGH);
-    digitalWrite(GREEN_PIN, HIGH);
-    digitalWrite(BLUE_PIN, HIGH);
-}
-
-void showSpectrum() {
-    int x;
-
-    for (x = 0; x < 768; ++x) {
-        showRGB(x);
-        delay(10);
-    }
+	return MSBLSB;
 }
 
 void showRGB(int color) {
-    int redIntensity;
-    int greenIntensity;
-    int blueIntensity;
+	int redIntensity;
+	int greenIntensity;
+	int blueIntensity;
 
-    if (color <= 255) {
-        redIntensity = 255 - color;
-        greenIntensity = color;
-        blueIntensity = 0;
-    } else if (color <= 511) {
-        redIntensity = 0;
-        greenIntensity = 255 - (color - 256);
-        blueIntensity = color - 256;
-    } else {
-        redIntensity = (color - 512);
-        greenIntensity = 0;
-        blueIntensity = 255 - (color - 512);
-    }
+	if (color <= 255) {
+		redIntensity = 255 - color;
+		greenIntensity = color;
+		blueIntensity = 0;
+	} else if (color <= 511) {
+		redIntensity = 0;
+		greenIntensity = 255 - (color - 256);
+		blueIntensity = (color - 256);
+	} else {
+		redIntensity = (color - 512);
+		greenIntensity = 0;
+		blueIntensity = 255 - (color - 512);
+	}
 
-    analogWrite(RED_PIN, redIntensity);
-    analogWrite(BLUE_PIN, blueIntensity);
-    analogWrite(GREEN_PIN, greenIntensity);
+	analogWrite(RED_PIN, redIntensity);
+	analogWrite(BLUE_PIN, blueIntensity);
+	analogWrite(GREEN_PIN, greenIntensity);
 }
